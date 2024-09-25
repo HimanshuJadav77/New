@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -16,75 +15,88 @@ class _technologyState extends State<technology> {
   String? _selectedValue; // Store selected value
   final List<String> _items = ['Option 1', 'Option 2', 'Option 3'];
 
-  String? _fileName;
-  Uint8List? _fileBytes;
-  html.File? _htmlFile;
+  final List<String> _fileNames = [];
+  final List<Uint8List?> _fileBytes = [];
+  final List<html.File?> _htmlFiles = [];
+  bool _isUploading = false;
+  bool _selecting = false;
 
-  Future<void> _pickFile() async {
+  Future<void> _pickFiles() async {
+    setState(() {
+      _selecting = true;
+    });
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
+      allowMultiple: true, // Allow multiple file selection
     );
 
     if (result != null) {
       setState(() {
-        _fileName = result.files.first.name;
-        if (html.window.navigator.userAgent.contains('Chrome') ||
-            html.window.navigator.userAgent.contains('Firefox')) {
-          _fileBytes = result.files.single.bytes;
-          _htmlFile = html.File(_fileBytes!, _fileName!);
+        _fileNames.clear();
+        _fileBytes.clear();
+        _htmlFiles.clear();
+
+        for (var file in result.files) {
+          _fileNames.add(file.name);
+          if (html.window.navigator.userAgent.contains('Chrome') ||
+              html.window.navigator.userAgent.contains('Firefox')) {
+            _fileBytes.add(file.bytes);
+            _htmlFiles.add(html.File(file.bytes!, file.name));
+          }
         }
+        _selecting = false;
       });
     }
   }
 
-  Future<void> _uploadFile() async {
-    if (_fileBytes == null) return;
+  Future<void> _uploadFiles() async {
+    if (_fileBytes.isEmpty) return;
+
+    setState(() {
+      _isUploading = true; // Start uploading
+    });
 
     try {
-      // Upload to Firebase Storage
-      final storageRef =
-          FirebaseStorage.instance.ref('uploads/').child('$_fileName');
-
-      final blob = html.Blob([_htmlFile!]);
-      await storageRef.putBlob(blob);
-
-      // Get the download URL
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      // Save metadata to Firestore
-      await FirebaseFirestore.instance.collection('pdfs').add({
-        'fileName': _fileName,
-        'downloadUrl': downloadUrl,
-        'uploadedAt': Timestamp.now(),
-      });
+      for (int i = 0; i < _fileBytes.length; i++) {
+        final fileName = _fileNames[i];
+        final blob = html.Blob([_htmlFiles[i]!]);
+        final storageRef = FirebaseStorage.instance.ref('uploads/').child(fileName);
+        await storageRef.putBlob(blob);
+      }
 
       // Reset the state
       if (mounted) {
         setState(() {
-          _fileName = null;
-          _fileBytes = null;
-          _htmlFile = null;
+          _fileNames.clear();
+          _fileBytes.clear();
+          _htmlFiles.clear();
+          _isUploading = false; // Reset upload state
         });
       }
 
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Upload successful!')));
     } catch (e) {
-      print('Error uploading file: $e');
+      print('Error uploading files: $e');
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Upload failed!')));
+      if (mounted) {
+        setState(() {
+          _isUploading = false; // Reset upload state on error
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Upload PDF')),
+      appBar: AppBar(title: const Text('Technology PDFs')),
       body: Center(
         child: Container(
           height: 700,
-          width: 300,
+          width: 700,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -108,28 +120,33 @@ class _technologyState extends State<technology> {
                   },
                   decoration: InputDecoration(
                     enabledBorder:
-                        OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
                     disabledBorder:
-                        OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
                     focusedBorder:
-                        OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
                   ),
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Selected File'),
-                  controller: TextEditingController(text: _fileName),
+                  decoration: const InputDecoration(labelText: 'Selected Files'),
+                  controller: TextEditingController(text: _fileNames.join(', ')),
                   readOnly: true,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _pickFile,
-                  child: const Text('Select PDF File'),
+                  onPressed: _pickFiles,
+                  child: const Text('Select PDF Files'),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _uploadFile,
-                  child: const Text('Upload PDF'),
+                  onPressed: _uploadFiles,
+                  child: const Text('Upload PDFs'),
                 ),
+                // Show progress indicator if uploading
+                if (_isUploading || _selecting)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  ),
               ],
             ),
           ),

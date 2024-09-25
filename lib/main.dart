@@ -1,3 +1,4 @@
+import 'package:admin_it_material_panel/drawer_pages/carouselslider_photos.dart';
 import 'package:admin_it_material_panel/drawer_pages/technology.dart';
 import 'package:admin_it_material_panel/drawer_pages/users.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,16 +7,16 @@ import 'package:flutter/material.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-          options: const FirebaseOptions(
-            apiKey: 'AIzaSyCodP9sOVOENTZBu6JKGPMub1g2Q0baqec',
-            appId: '1:373637410895:web:f41487400948731df8ba3a',
-            messagingSenderId: '373637410895',
-            projectId: 'it-materials-point',
-            authDomain: 'it-materials-point.firebaseapp.com',
-            storageBucket: 'it-materials-point.appspot.com',
-            measurementId: 'G-TB2FWT4HHQ',
-          ),
-        );
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyCodP9sOVOENTZBu6JKGPMub1g2Q0baqec',
+      appId: '1:373637410895:web:f41487400948731df8ba3a',
+      messagingSenderId: '373637410895',
+      projectId: 'it-materials-point',
+      authDomain: 'it-materials-point.firebaseapp.com',
+      storageBucket: 'it-materials-point.appspot.com',
+      measurementId: 'G-TB2FWT4HHQ',
+    ),
+  );
 
   runApp(const MyApp());
 }
@@ -46,7 +47,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = <Widget>[const users(), const technology()];
+  final List<Widget> _pages = <Widget>[
+    const users(),
+    const technology(),
+    CarouselsliderPhotos()
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -95,45 +100,61 @@ class _MyHomePageState extends State<MyHomePage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            Drawer(
-              width: !_show ? 65 : 160,
-              elevation: 5,
-              child: ListView(
-                // padding: EdgeInsets.zero,
-                children: [
-                  const SizedBox(
-                    height: 200,
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.person_search_outlined),
-                    title: Text(
-                      _show ? 'Users' : '',
-                      style: const TextStyle(fontSize: 15),
+            AnimatedContainer(
+              width: !_show ? 65 : 180,
+              duration: Duration(milliseconds: 100),
+              child: Drawer(
+                width: !_show ? 65 : 180,
+                child: ListView(
+                  // padding: EdgeInsets.zero,
+                  children: [
+                    const SizedBox(
+                      height: 200,
                     ),
-                    onTap: () {
-                      _onItemTapped(0);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings_ethernet_outlined),
-                    title: Text(
-                      _show ? 'Technology' : '',
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    onTap: () {
-                      _onItemTapped(1);
-                    },
-                  ),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _show = !_show;
-                        });
+                    ListTile(
+                      leading: const Icon(Icons.person_search_outlined),
+                      title: Text(
+                        _show ? 'Users' : '',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      onTap: () {
+                        _onItemTapped(0);
                       },
-                      icon: Icon(!_show
-                          ? Icons.arrow_forward_ios_outlined
-                          : Icons.arrow_back_ios)),
-                ],
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.settings_ethernet_outlined),
+                      title: Text(
+                        _show ? 'Technology' : '',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      onTap: () {
+                        _onItemTapped(1);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.image),
+                      title: Text(
+                        _show ? 'Carousel slider Photos' : '',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      onTap: () {
+                        _onItemTapped(2);
+                      },
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _show = !_show;
+                          });
+                        },
+                        icon: Icon(
+                          !_show
+                              ? Icons.arrow_forward_ios_outlined
+                              : Icons.arrow_back_ios,
+                          size: 20,
+                        )),
+                  ],
+                ),
               ),
             ),
             // 1328
