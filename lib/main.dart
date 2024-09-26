@@ -100,84 +100,66 @@ class _MyHomePageState extends State<MyHomePage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            AnimatedContainer(
+            Drawer(
               width: !_show ? 65 : 180,
-              duration: Duration(milliseconds: 100),
-              child: Drawer(
-                width: !_show ? 65 : 180,
-                child: ListView(
-                  // padding: EdgeInsets.zero,
-                  children: [
-                    const SizedBox(
-                      height: 200,
+              child: ListView(
+                // padding: EdgeInsets.zero,
+                children: [
+                  const SizedBox(
+                    height: 200,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.person_search_outlined),
+                    title: Text(
+                      _show ? 'Users' : '',
+                      style: const TextStyle(fontSize: 15),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.person_search_outlined),
-                      title: Text(
-                        _show ? 'Users' : '',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      onTap: () {
-                        _onItemTapped(0);
+                    onTap: () {
+                      _onItemTapped(0);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings_ethernet_outlined),
+                    title: Text(
+                      _show ? 'Technology' : '',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    onTap: () {
+                      _onItemTapped(1);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.image),
+                    title: Text(
+                      _show ? 'Carousel slider Photos' : '',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    onTap: () {
+                      _onItemTapped(2);
+                    },
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _show = !_show;
+                        });
                       },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.settings_ethernet_outlined),
-                      title: Text(
-                        _show ? 'Technology' : '',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      onTap: () {
-                        _onItemTapped(1);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.image),
-                      title: Text(
-                        _show ? 'Carousel slider Photos' : '',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      onTap: () {
-                        _onItemTapped(2);
-                      },
-                    ),
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _show = !_show;
-                          });
-                        },
-                        icon: Icon(
-                          !_show
-                              ? Icons.arrow_forward_ios_outlined
-                              : Icons.arrow_back_ios,
-                          size: 20,
-                        )),
-                  ],
-                ),
+                      icon: Icon(
+                        !_show
+                            ? Icons.arrow_forward_ios_outlined
+                            : Icons.arrow_back_ios,
+                        size: 20,
+                      )),
+                ],
               ),
             ),
-            // 1328
-            Container(
+            SizedBox(
               width: !_show ? 1423 : 1328,
-              //color: Colors.transparent,
               child: _pages[_selectedIndex],
             )
           ],
         ),
       ),
-
-      // body: PageView(
-      //   controller: PageController(initialPage: _selectedIndex),
-      //   children: _pages,
-      //   onPageChanged: _onItemTapped,
-      //),
-
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {},
-      //   tooltip: '',
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 }
